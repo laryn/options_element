@@ -67,11 +67,6 @@ div.options-widget table td.option-actions-cell {
   width: 40px;
 }
 
-div.options-widget table tr.indented input.form-text,
-div.options-widget table tr.indented a.add {
-  margin-left: 0;
-}
-
 div.options-widget table tr.indented input.option-default {
   margin-right: -20px;
 }
