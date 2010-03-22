@@ -11,7 +11,7 @@ Drupal.behaviors.optionsElement = function(context) {
   $('div.form-options:not(.options-element-processed)', context).each(function() {
     $(this).addClass('options-element-processed');
     var optionsElement = new Drupal.optionsElement(this);
-    Drupal.optionElements[optionsElement.manualOptionsElement.id] = optionsElement;
+    Drupal.optionElements[optionsElement.identifier] = optionsElement;
   });
 };
 
@@ -42,11 +42,18 @@ Drupal.optionsElement = function(element) {
   // Setup new DOM elements containing the actual options widget.
   this.optionsElement = $('<div></div>').get(0); // Temporary DOM object. 
   this.optionsToggleElement = $(Drupal.theme('optionsElementToggle')).get(0);
+  this.optionAddElement = $(Drupal.theme('optionsElementAdd')).get(0);
 
   // Add the options widget and toggle elements to the page.
-  $(this.manualElement).css('display', 'none').before(this.optionsElement).after(this.optionsToggleElement);
+  $(this.manualElement).css('display', 'none').before(this.optionsElement).after(this.optionsToggleElement).after(this.optionAddElement);
 
-  // Add a toggle action for manual entry of options.
+  // Enable add item link.
+  $(this.optionAddElement).find('a').click(function() {
+    self.addOption($('table tr:last', self.optionsElement).get(0));
+    return false;
+  });
+
+  // Enable the toggle action for manual entry of options.
   $(this.optionsToggleElement).find('a').click(function() {
     self.toggleMode();
     return false;
@@ -148,13 +155,14 @@ Drupal.optionsElement.prototype.updateWidgetElements = function() {
   }
 
   // Enable button for adding options.
-  $('a.add', this.optionElement).click(function() {
-    self.addOption($(this).parents('tr:first').get(0));
+  $('a.add', this.optionsElement).click(function() {
+    var newOption = self.addOption($(this).parents('tr:first').get(0));
+    $(newOption).find('a.add').focus();
     return false;
   });
 
   // Enable button for removing options.
-  $('a.remove', this.optionElement).click(function() {
+  $('a.remove', this.optionsElement).click(function() {
     self.removeOption($(this).parents('tr:first').get(0));
     return false;
   });
@@ -257,7 +265,7 @@ Drupal.optionsElement.prototype.updateOptionElements = function() {
   var self = this;
   var previousRow = false;
   var previousElement = false;
-  var $rows = $(this.optionsElement).find('tr');
+  var $rows = $(this.optionsElement).find('tbody tr');
 
   $rows.each(function(index) {
     var optionValue = $(this).find('input.option-value').val();
@@ -301,6 +309,7 @@ Drupal.optionsElement.prototype.updateOptionElements = function() {
  */
 Drupal.optionsElement.prototype.addOption = function(currentOption) {
   var self = this;
+  var windowHieght = $(document).height();
   var newOption = $(currentOption).clone()
     .find('input.option-key').val(self.keyType == 'numeric' ? self.nextNumericKey() : '').end()
     .find('input.option-value').val('').end()
@@ -310,12 +319,16 @@ Drupal.optionsElement.prototype.addOption = function(currentOption) {
     .insertAfter(currentOption)
     .get(0);
 
+  // Scroll down to accomidate the new option.
+  $(window).scrollTop($(window).scrollTop() + $(document).height() - windowHieght);
+
   // Make the new option draggable.
   Drupal.tableDrag[this.identifier].makeDraggable(newOption);
 
   // Enable button for adding options.
   $('a.add', newOption).click(function() {
-    self.addOption(newOption);
+    var newOption = self.addOption($(this).parents('tr:first').get(0));
+    $(newOption).find('a.add').focus();
     return false;
   });
 
@@ -338,6 +351,8 @@ Drupal.optionsElement.prototype.addOption = function(currentOption) {
 
   this.updateOptionElements();
   this.updateManualElements();
+
+  return newOption;
 }
 
 /**
@@ -358,13 +373,13 @@ Drupal.optionsElement.prototype.toggleMode = function() {
     var height = $(this.optionsElement).height();
     $(this.optionsElement).css('display', 'none');
     $(this.manualElement).css('display', '').find('textarea').height(height);
-    $(this.optionsToggleElement).find('a').html(Drupal.t('Normal entry'));
+    $(this.optionsToggleElement).find('.form-options-manual a').html(Drupal.t('Normal entry'));
   }
   else {
     this.updateWidgetElements();
     $(this.optionsElement).css('display', '');
     $(this.manualElement).css('display', 'none');
-    $(this.optionsToggleElement).find('a').html(Drupal.t('Manual entry'));
+    $(this.optionsToggleElement).find('.form-options-manual a').html(Drupal.t('Manual entry'));
   }
 }
 
@@ -693,6 +708,10 @@ Drupal.theme.prototype.optionsElement = function(optionsElement) {
   output += '<div>';
 
   return output;
+}
+
+Drupal.theme.prototype.optionsElementAdd = function() {
+  return '<div class="form-option-add"><a href="#">' + Drupal.t('Add item') + '</a></div>';
 }
 
 Drupal.theme.prototype.optionsElementToggle = function() {
