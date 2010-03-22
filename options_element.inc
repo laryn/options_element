@@ -37,7 +37,9 @@ function theme_options($element) {
 
   $options = '';
   $options .= drupal_render($element['options_field']);
-  $options .= drupal_render($element['default_value_field']);
+  if (isset($element['default_value_field'])) {
+    $options .= drupal_render($element['default_value_field']);
+  }
 
   $settings = '';
   if (isset($element['custom_keys'])) {
@@ -45,6 +47,9 @@ function theme_options($element) {
   }
   if (isset($element['multiple'])) {
     $settings .= drupal_render($element['multiple']);
+  }
+  if (isset($element['option_settings'])) {
+    $settings .= drupal_render($element['option_settings']);
   }
 
   $output = '';
@@ -138,7 +143,7 @@ function _form_options_expand($element) {
   }
 
   // Add the field for storing default values.
-  if (!isset($element['default_value_field'])) {
+  if ($element['#default_value'] !== FALSE && !isset($element['default_value_field'])) {
     $element['default_value_field'] = array(
       '#title' => t('Default value'),
       '#type' => 'textfield',
@@ -180,7 +185,7 @@ function _form_options_validate($element, &$form_state) {
 
   // Add the list of duplicates to the page so that we can highlight the fields.
   if (!empty($duplicates)) {
-    drupal_add_js(array('optionsElement' => array('errors' => $duplicates)), 'setting');
+    drupal_add_js(array('optionsElement' => array('errors' => drupal_map_assoc($duplicates))), 'setting');
   }
 
   // Check if no options are specified.
@@ -233,23 +238,27 @@ function _form_type_options_value(&$element, $edit = FALSE) {
     $options = form_options_from_text($edit['options_field'], $element['#key_type'], empty($element['#optgroups']), $duplicates);
 
     // Convert default value.
-    if ($element['#multiple']) {
-      $default_value = explode(',', $edit['default_value_field']);
-      foreach ($default_value as $key => &$value) {
-        $value = trim($value);
-        if ($value === '') {
-          unset($default_value[$key]);
+    if (isset($edit['default_value_field'])) {
+      if ($element['#multiple']) {
+        $default_value = array();
+        $default_items = explode(',', $edit['default_value_field']);
+        foreach ($default_items as $key) {
+          $key = trim($key);
+          if ($value = _form_options_search($key, $options)) {
+            $default_value[] = $value;
+          }
         }
       }
-    }
-    else {
-      $default_value = $edit['default_value_field'];
+      else {
+        $default_value = trim($edit['default_value_field']);
+      }
     }
 
     return array(
       'options' => $options,
-      'text' => $edit['options_field'],
       'default_value' => $default_value,
+      'options_text' => $edit['options_field'],
+      'default_value_text' => $edit['default_value_field'],
     );
   }
 }
@@ -301,58 +310,95 @@ function _form_options_to_text($options, $key_type) {
  * @see form_options_from_text()
  */
 function _form_options_from_text($text, $key_type, $flat = FALSE, &$duplicates = array()) {
-  $options = array();
+  $keys = array();
+  $items = array();
   $rows = array_filter(explode("\n", trim($text)));
   $group = FALSE;
-
-  foreach ($rows as $option) {
-    $option = trim($option);
+  foreach ($rows as $row) {
+    $row = trim($row);
     $matches = array();
 
     // Check for a simple empty row.
-    if (empty($option)) {
+    if (empty($row)) {
       continue;
     }
     // Check if this row is a group.
-    elseif (!$flat && preg_match('/^\<([^>]*)\>$/', $option, $matches)) {
+    elseif (!$flat && preg_match('/^\<([^>]*)\>$/', $row, $matches)) {
       if ($matches[1] === '') {
         $group = FALSE;
       }
       elseif (!$flat) {
         $group = $matches[1];
+        $keys[] = $group;
       }
     }
     // Check if this row is a key|value pair.
-    elseif (($key_type == 'mixed' || $key_type == 'custom' || $key_type == 'numeric') && preg_match('/^([^|]+)\|(.*)$/', $option, $matches)) {
+    elseif (($key_type == 'mixed' || $key_type == 'custom' || $key_type == 'numeric') && preg_match('/^([^|]+)\|(.*)$/', $row, $matches)) {
       $key = $matches[1];
       $value = $matches[2];
-      if ($group !== FALSE) {
-        isset($options[$group][$key]) ? $duplicates[$key] = $key : $options[$group][$key] = $value;
-      }
-      else {
-        isset($options[$key]) ? $duplicates[$key] = $key : $options[$key] = $value;
-      }
+      $keys[] = $key;
+      $items[] = array(
+        'key' => $key,
+        'value' => $value,
+        'group' => $group,
+      );
     }
-    // Check if this row is a straight value.
+    // Set this this row as a straight value.
     else {
-      if ($group !== FALSE) {
-        if ($key_type == 'none' || $key_type == 'mixed') {
-          $options[$group][] = $option;
-        }
-        else {
-          isset($options[$group][$option]) ? $duplicates[$option] = $option : $options[$group][$option] = $option;
-        }
+      $items[] = array(
+        'key' => NULL,
+        'value' => $row,
+        'group' => $group,
+      );
+    }
+  }
+
+  // Expand the list into a nested array, assign keys and check duplicates.
+  $options = array();
+  $new_key = 0;
+  foreach ($items as $item) {
+    // Assign a key if needed.
+    if ($key_type == 'none') {
+      $item['key'] = $new_key++;
+    }
+    elseif (!isset($item['key'])) {
+      while (in_array($new_key, $keys)) {
+        $new_key++;
       }
-      else {
-        if ($key_type == 'none' || $key_type == 'mixed') {
-          $options[] = $option;
-        }
-        else {
-          isset($options[$option]) ? $duplicates[$option] = $option : $options[$option] = $option;
-        }
+      $keys[] = $new_key;
+      $item['key'] = $new_key;
+    }
+
+    if ($item['group']) {
+      if (isset($options[$item['group']][$item['key']])) {
+        $duplicates[] = $item['key'];
       }
+      $options[$item['group']][$item['key']] = $item['value'];
+    }
+    else {
+      if (isset($options[$item['key']])) {
+        $duplicates[] = $item['key'];
+      }
+      $options[$item['key']] = $item['value'];
     }
   }
 
   return $options;
+}
+
+/**
+ * Recursive function for finding default value keys. Matches on keys or values.
+ */
+function _form_options_search($needle, $haystack) {
+  if (isset($haystack[$needle])) {
+    return $needle;
+  }
+  foreach ($haystack as $key => $value) {
+    if (is_array($value) && ($return = _form_options_search($needle, $value))) {
+      return $return;
+    }
+    if ($value == $needle) {
+      return $key;
+    }
+  }
 }

@@ -59,6 +59,14 @@ div.options-widget table td.option-default-cell {
   width: 5em;
 }
 
+div.options-widget table td.option-order-cell {
+  width: 2em;
+}
+
+div.options-widget table tr.indented td.option-order-cell {
+  width: 4em;
+}
+
 div.options-widget table td.option-key-cell {
   width: 20%;
 }

@@ -4,10 +4,14 @@
  * @file
  * Add JavaScript behaviors for the "options" form element type.
  */
+
+Drupal.optionElements = Drupal.optionElements || {};
+
 Drupal.behaviors.optionsElement = function(context) {
   $('div.form-options:not(.options-element-processed)', context).each(function() {
     $(this).addClass('options-element-processed');
-    new Drupal.optionsElement(this);
+    var optionsElement = new Drupal.optionsElement(this);
+    Drupal.optionElements[optionsElement.manualOptionsElement.id] = optionsElement;
   });
 };
 
@@ -94,7 +98,7 @@ Drupal.optionsElement = function(element) {
   // Update the options widget with the current state of the textarea.
   this.updateWidgetElements();
 
-  // Highlight errors that may have occured during Drupal validation.
+  // Highlight errors that may have occurred during Drupal validation.
   if (Drupal.settings.optionsElement && Drupal.settings.optionsElement.errors) {
     this.checkKeys(Drupal.settings.optionsElement.errors, 'error');
   }
@@ -234,7 +238,9 @@ Drupal.optionsElement.prototype.updateManualElements = function() {
 
   // Update with the new text and trigger the change action on the field.
   this.optionsToText();
-  this.manualDefaultValueElement.value = multiple ? defaultValue.join(', ') : defaultValue;
+  if (this.manualDefaultValueElement) {
+    this.manualDefaultValueElement.value = multiple ? defaultValue.join(', ') : defaultValue;
+  }
 
   $(this.manualOptionsElement).change();
 }
@@ -249,6 +255,7 @@ Drupal.optionsElement.prototype.updateManualElements = function() {
  */
 Drupal.optionsElement.prototype.updateOptionElements = function() {
   var self = this;
+  var previousRow = false;
   var previousElement = false;
   var $rows = $(this.optionsElement).find('tr');
 
@@ -271,14 +278,15 @@ Drupal.optionsElement.prototype.updateOptionElements = function() {
 
     if (depth == 1) {
       $(previousElement).attr('disabled', true).attr('checked', false);
-      $(previousElement).parents('tr:first').find('a.add, a.remove').css('display', 'none');
-      $(defaultInput).parents('tr:first').find('a.add, a.remove').css('display', '');
+      $(previousRow).find('a.add, a.remove').css('display', 'none');
+      $(this).find('a.add, a.remove').css('display', '');
       $(defaultInput).attr('disabled', false);
     }
     else {
       $(defaultInput).attr('disabled', false);
-      $(defaultInput).parents('tr:first').find('a.add, a.remove').css('display', '');
+      $(this).find('a.add, a.remove').css('display', '');
       previousElement = defaultInput;
+      previousRow = this;
     }
   });
 
@@ -511,16 +519,18 @@ Drupal.optionsElement.prototype.optionsFromText = function() {
     rows.pop();
   }
 
-  if (this.multiple) {
-    var defaults = this.manualDefaultValueElement.value.split(',');
-    for (var n in defaults) {
-      var defaultValue = defaults[n].replace(/^[ ]*(.*?)[ ]*$/, '$1'); // trim().
+  if (this.manualDefaultValueElement) {
+    if (this.multiple) {
+      var defaults = this.manualDefaultValueElement.value.split(',');
+      for (var n in defaults) {
+        var defaultValue = defaults[n].replace(/^[ ]*(.*?)[ ]*$/, '$1'); // trim().
+        defaultValues[defaultValue] = defaultValue;
+      }
+    }
+    else {
+      var defaultValue = this.manualDefaultValueElement.value.replace(/^[ ]*(.*?)[ ]*$/, '$1'); // trim().
       defaultValues[defaultValue] = defaultValue;
     }
-  }
-  else {
-    var defaultValue = this.manualDefaultValueElement.value.replace(/^[ ]*(.*?)[ ]*$/, '$1'); // trim().
-    defaultValues[defaultValue] = defaultValue;
   }
 
   for (var n in rows) {
@@ -612,6 +622,7 @@ Drupal.optionsElement.prototype.nextNumericKey = function(options) {
 Drupal.theme.prototype.optionsElement = function(optionsElement) {
   var output = '';
   var options = optionsElement.optionsFromText();
+  var hasDefault = optionsElement.manualDefaultValueElement;
   var defaultType = optionsElement.multiple ? 'checkbox' : 'radio';
   var keyType = optionsElement.customKeys ? 'textfield' : 'hidden';
 
@@ -619,13 +630,15 @@ Drupal.theme.prototype.optionsElement = function(optionsElement) {
   function tableDragRow(key, value, parentKey, indent, status) {
     var output = '';
     output += '<tr class="draggable' + (indent > 0 ? ' indented' : '') + '">'
-    output += '<td class="option-default-cell">';
+    output += '<td class="' + (hasDefault ? 'option-default-cell' : 'option-order-cell') + '">';
     for (var n = 0; n < indent; n++) {
       output += Drupal.theme('tableDragIndentation');
     }
     output += '<input type="hidden" class="option-parent" value="' + parentKey + '" />';
     output += '<input type="hidden" class="option-depth" value="' + indent + '" />';
-    output += '<input type="' + defaultType + '" name="' + optionsElement.identifier + '-default" class="form-radio option-default" value="' + key + '"' + (status == 'checked' ? ' checked="checked"' : '') + (status == 'disabled' ? ' disabled="disabled"' : '') + ' />';
+    if (hasDefault) {
+      output += '<input type="' + defaultType + '" name="' + optionsElement.identifier + '-default" class="form-radio option-default" value="' + key + '"' + (status == 'checked' ? ' checked="checked"' : '') + (status == 'disabled' ? ' disabled="disabled"' : '') + ' />';
+    }
     output += '</td><td class="' + (keyType == 'textfield' ? 'option-key-cell' : 'option-value-cell') +'">';
     output += '<input type="' + keyType + '" class="' + (keyType == 'textfield' ? 'form-text ' : '') + 'option-key" value="' + key + '" />';
     output += keyType == 'textfield' ? '</td><td class="option-value-call">' : '';
@@ -642,7 +655,7 @@ Drupal.theme.prototype.optionsElement = function(optionsElement) {
   output += '<table id="' + optionsElement.identifier + '">';
 
   output += '<thead><tr>';
-  output += '<th>' + Drupal.t('Default') + '</th>';
+  output += '<th>' + (hasDefault ? Drupal.t('Default') : '&nbsp;') + '</th>';
   output += keyType == 'textfield' ? '<th>' + Drupal.t('Key') + '</th>' : '';
   output += '<th>' + Drupal.t('Value') + '</th>';
   output += '<th>&nbsp;</th>';
