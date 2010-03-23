@@ -372,14 +372,16 @@ Drupal.optionsElement.prototype.toggleMode = function() {
   if ($(this.optionsElement).is(':visible')) {
     var height = $(this.optionsElement).height();
     $(this.optionsElement).css('display', 'none');
+    $(this.optionAddElement).css('display', 'none');
     $(this.manualElement).css('display', '').find('textarea').height(height);
-    $(this.optionsToggleElement).find('.form-options-manual a').html(Drupal.t('Normal entry'));
+    $(this.optionsToggleElement).find('a').text(Drupal.t('Normal entry'));
   }
   else {
     this.updateWidgetElements();
     $(this.optionsElement).css('display', '');
+    $(this.optionAddElement).css('display', '');
     $(this.manualElement).css('display', 'none');
-    $(this.optionsToggleElement).find('.form-options-manual a').html(Drupal.t('Manual entry'));
+    $(this.optionsToggleElement).find('a').text(Drupal.t('Manual entry'));
   }
 }
 

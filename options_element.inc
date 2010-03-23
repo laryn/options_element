@@ -132,11 +132,9 @@ function _form_options_expand($element) {
     if ($element['#key_type'] == 'mixed' || $element['#key_type'] == 'numeric' || $element['#key_type'] == 'custom') {
       $element['options_field']['#description'] .= ' ' . t('Key-value pairs may be specified by separating each option with pipes, such as <em>key|value</em>.');
     }
-
-    if ($element['#key_type_toggle']) {
+    elseif ($element['#key_type_toggle']) {
       $element['options_field']['#description'] .= ' ' . t('If the %toggle field is checked, key-value pairs may be specified by separating each option with pipes, such as <em>key|value</em>.', array('%toggle' => $element['custom_keys']['#title']));
     }
-
     if ($element['#key_type'] == 'numeric') {
       $element['options_field']['#description'] .= ' ' . t('This field requires all specified keys to be integers.');
     }
