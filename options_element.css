@@ -1,11 +1,7 @@
 /* $Id$ */
 
-div.options-widget tr input {
-  float: left; /* RTL */
-}
-
 div.options-widget .draggable a.tabledrag-handle {
-  padding-right: .5em /* RTL */
+  padding-right: .3em /* RTL */
 }
 
 div.form-options fieldset.options {
@@ -65,8 +61,13 @@ div.options-widget table {
   margin: 0;
 }
 
+div.options-widget table td {
+  padding: 4px 6px;
+}
+
 div.options-widget table td.option-default-cell {
-  width: 5em;
+  width: 6em;
+  padding: 4px 0;
 }
 
 div.options-widget table td.option-order-cell {
@@ -83,10 +84,6 @@ div.options-widget table td.option-key-cell {
 
 div.options-widget table td.option-actions-cell {
   width: 40px;
-}
-
-div.options-widget table tr.indented input.option-default {
-  margin-right: -20px;
 }
 
 div.options-widget input.form-text {

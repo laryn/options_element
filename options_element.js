@@ -148,7 +148,7 @@ Drupal.optionsElement.prototype.updateWidgetElements = function() {
         hidden: false,
         limit: 1,
         relationship: 'parent',
-        source: 'option-key',
+        source: 'option-value',
         target: 'option-parent'
       }
     };
@@ -290,18 +290,23 @@ Drupal.optionsElement.prototype.updateOptionElements = function() {
       $(this).find('a.add, a.remove').css('display', '');
       $(defaultInput).attr('disabled', false);
 
-      if (self.customKeys) {
-        $(previousRow).find('td.option-value-cell').css('display', 'none');
-        $(previousRow).find('td.option-key-cell').attr('colspan', 2);
+      // Hide the key column for the optgroup. It would be nice if hiding
+      // columns worked in IE7, but for now this only works in IE8 and other
+      // standards-compliant browsers.
+      if (self.customKeys && (!$.browser.msie || $.browser.version >= 8)) {
+        $(previousRow).find('td.option-key-cell').css('display', 'none');
+        $(previousRow).find('td.option-value-cell').attr('colspan', 2);
       }
     }
     else {
       // Set properties for normal options that are not optgroups.
       $(defaultInput).attr('disabled', false);
       $(this).removeClass('optgroup').find('a.add, a.remove').css('display', '');
-      if (self.customKeys) {
-        $(this).find('td.option-value-cell').css('display', '');
-        $(this).find('td.option-key-cell').attr('colspan', '');
+
+      // Hide the key column. See note above for compatibility concerns.
+      if (self.customKeys && (!$.browser.msie || $.browser.version >= 8)) {
+        $(this).find('td.option-key-cell').css('display', '');
+        $(this).find('td.option-value-cell').attr('colspan', '');
       }
       previousElement = defaultInput;
       previousRow = this;
@@ -503,8 +508,8 @@ Drupal.optionsElement.prototype.optionsToText = function() {
     var value = $rows.eq(rowIndex).find('input.option-value').val();
 
     // Handle groups.
-    if (this.optgroups && (this.customKeys && key ? key : value) !== '' && isOptgroup) {
-      output += '<' + (this.customKeys && key ? key : value) + '>' + "\n";
+    if (this.optgroups && value !== '' && isOptgroup) {
+      output += '<' + ((key !== '') ? (key + '|') : '') + value + '>' + "\n";
       inGroup = true;
     }
     // Typical key|value pairs.
@@ -537,7 +542,7 @@ Drupal.optionsElement.prototype.optionsToText = function() {
 Drupal.optionsElement.prototype.optionsFromText = function() {
   // Use jQuery val() instead of value because it fixes Windows line breaks.
   var rows = $(this.manualOptionsElement).val().match(/^.*$/mg);
-  var parentKey = '';
+  var parent = '';
   var options = [];
   var defaultValues = {};
 
@@ -570,13 +575,14 @@ Drupal.optionsElement.prototype.optionsFromText = function() {
 
     var matches = {};
     // Row is a group.
-    if (this.optgroups && (matches = row.match(/^\<([^>]*)\>$/))) {
+    if (this.optgroups && (matches = row.match(/^\<((([^>|]*)\|)?([^>]*))\>$/))) {
       if (matches[0] == '<>') {
-        parentKey = '';
+        parent = '';
         groupClear = true;
       }
       else {
-        parentKey = key = value = matches[1];
+        key = matches[3] ? matches[3] : '';
+        parent = value = matches[4];
         hasChildren = true;
       }
     }
@@ -602,7 +608,7 @@ Drupal.optionsElement.prototype.optionsFromText = function() {
       options.push({
         key: key,
         value: value,
-        parent: (key !== parentKey ? parentKey : ''),
+        parent: (value !== parent ? parent : ''),
         hasChildren: hasChildren,
         checked: (checked ? 'checked' : false)
       });
@@ -654,14 +660,14 @@ Drupal.theme.prototype.optionsElement = function(optionsElement) {
   var keyType = optionsElement.customKeys ? 'textfield' : 'hidden';
 
   // Helper function to print out a single draggable option row.
-  function tableDragRow(key, value, parentKey, indent, status) {
+  function tableDragRow(key, value, parent, indent, status) {
     var output = '';
     output += '<tr class="draggable' + (indent > 0 ? ' indented' : '') + '">'
     output += '<td class="' + (hasDefault ? 'option-default-cell' : 'option-order-cell') + '">';
     for (var n = 0; n < indent; n++) {
       output += Drupal.theme('tableDragIndentation');
     }
-    output += '<input type="hidden" class="option-parent" value="' + parentKey + '" />';
+    output += '<input type="hidden" class="option-parent" value="' + parent + '" />';
     output += '<input type="hidden" class="option-depth" value="' + indent + '" />';
     if (hasDefault) {
       output += '<input type="' + defaultType + '" name="' + optionsElement.identifier + '-default" class="form-radio option-default" value="' + key + '"' + (status == 'checked' ? ' checked="checked"' : '') + (status == 'disabled' ? ' disabled="disabled"' : '') + ' />';
@@ -707,12 +713,8 @@ Drupal.theme.prototype.optionsElement = function(optionsElement) {
   for (var n in options) {
     var option = options[n];
     var depth = option.parent === '' ? 0 : 1;
-    if (option.hasChildren) {
-      output += tableDragRow(option.key, option.key, option.parent, depth, 'disabled');
-    }
-    else {
-      output += tableDragRow(option.key, option.value, option.parent, depth, option.checked);
-    }
+    var checked = !option.hasChildren && option.checked;
+    output += tableDragRow(option.key, option.value, option.parent, depth, checked);
   }
 
   output += '</tbody>';

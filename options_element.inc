@@ -321,12 +321,12 @@ function _form_options_from_text($text, $key_type, $flat = FALSE, &$duplicates =
       continue;
     }
     // Check if this row is a group.
-    elseif (!$flat && preg_match('/^\<([^>]*)\>$/', $row, $matches)) {
+    elseif (!$flat && preg_match('/^\<((([^>|]*)\|)?([^>]*))\>$/', $row, $matches)) {
       if ($matches[1] === '') {
         $group = FALSE;
       }
-      elseif (!$flat) {
-        $group = $matches[1];
+      else {
+        $group = $matches[4] ? $matches[4] : '';
         $keys[] = $group;
       }
     }
