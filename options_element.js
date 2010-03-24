@@ -61,7 +61,7 @@ Drupal.optionsElement = function(element) {
 
   // Add a handler for key type changes.
   if (this.keyTypeToggle) {
-    $(this.keyTypeToggle).change(function() {
+    $(this.keyTypeToggle).click(function() {
       var checked = $(this).attr('checked');
       // Before switching the key type, ensure we're not destroying user keys.
       if (!checked) {
@@ -92,7 +92,7 @@ Drupal.optionsElement = function(element) {
 
   // Add a handler for multiple value changes.
   if (this.multipleToggle) {
-    $(this.multipleToggle).change(function(){
+    $(this.multipleToggle).click(function(){
       self.setMultiple($(this).attr('checked'));
     });
   }
@@ -135,7 +135,7 @@ Drupal.optionsElement.prototype.updateWidgetElements = function() {
         limit: 0,
         relationship: 'self',
         source: 'option-depth',
-        target: 'option-depth',
+        target: 'option-depth'
       }
     }
   };
@@ -149,7 +149,7 @@ Drupal.optionsElement.prototype.updateWidgetElements = function() {
         limit: 1,
         relationship: 'parent',
         source: 'option-key',
-        target: 'option-parent',
+        target: 'option-parent'
       }
     };
   }
@@ -281,18 +281,28 @@ Drupal.optionsElement.prototype.updateOptionElements = function() {
 
     // Hide the add/remove links the row if indented.
     var depth = $(this).find('input.option-depth').val();
-    var parent = $(this).find('input.option-parent').val();
     var defaultInput = $(this).find('input.option-default').get(0);
 
     if (depth == 1) {
+      // Affect the parent row, adjusting properties for optgroup items.
       $(previousElement).attr('disabled', true).attr('checked', false);
-      $(previousRow).find('a.add, a.remove').css('display', 'none');
+      $(previousRow).addClass('optgroup').find('a.add, a.remove').css('display', 'none');
       $(this).find('a.add, a.remove').css('display', '');
       $(defaultInput).attr('disabled', false);
+
+      if (self.customKeys) {
+        $(previousRow).find('td.option-value-cell').css('display', 'none');
+        $(previousRow).find('td.option-key-cell').attr('colspan', 2);
+      }
     }
     else {
+      // Set properties for normal options that are not optgroups.
       $(defaultInput).attr('disabled', false);
-      $(this).find('a.add, a.remove').css('display', '');
+      $(this).removeClass('optgroup').find('a.add, a.remove').css('display', '');
+      if (self.customKeys) {
+        $(this).find('td.option-value-cell').css('display', '');
+        $(this).find('td.option-key-cell').attr('colspan', '');
+      }
       previousElement = defaultInput;
       previousRow = this;
     }
@@ -482,39 +492,38 @@ Drupal.optionsElement.prototype.pendingUpdate = function(e) {
 Drupal.optionsElement.prototype.optionsToText = function() {
   var $rows = $('tbody tr', this.optionsElement);
   var output = '';
-  var previousParent = $rows.filter(':last').find('input.option-parent').val();
+  var inGroup = false;
   var rowCount = $rows.size();
   var defaultValues = [];
 
-  // Loop through rows in reverse to find parents easier.
-  for (var rowIndex = rowCount - 1; rowIndex >= 0; rowIndex--) {
-    var indent = $rows.eq(rowIndex).find('input.option-depth').val();
+  for (var rowIndex = 0; rowIndex < rowCount; rowIndex++) {
+    var isOptgroup = $rows.eq(rowIndex).is('.optgroup');
+    var isChild = $rows.eq(rowIndex).is('.indented');
     var key = $rows.eq(rowIndex).find('input.option-key').val();
     var value = $rows.eq(rowIndex).find('input.option-value').val();
-    var parent = $rows.eq(rowIndex).find('input.option-parent').val();
-    var checked = $rows.eq(rowIndex).find('input.option-default').attr('checked');
 
     // Handle groups.
-    if (this.optgroups && key !== '' && key == previousParent) {
-      output = '<' + key + '>' + "\n" + output;
-      previousParent = '';
+    if (this.optgroups && (this.customKeys && key ? key : value) !== '' && isOptgroup) {
+      output += '<' + (this.customKeys && key ? key : value) + '>' + "\n";
+      inGroup = true;
     }
     // Typical key|value pairs.
     else {
       // Exit out of any groups.
-      if (this.optgroups && previousParent != parent && parent !== '') {
-        output = "<>\n" + output;
+      if (this.optgroups && inGroup && !isChild) {
+        output += "<>\n";
+        inGroup = false;
       }
+
+      // Add the row for the option.
       if (this.keyType == 'none' || this.keyType == 'associative') {
-        output = value + "\n" + output;
-        previousParent = parent;
+        output += value + "\n";
       }
       else if (value == '') {
-        output = "\n" + output;
+        output += "\n";
       }
       else {
-        output = ((key !== '') ? (key + '|') : '') + value + "\n" + output;
-        previousParent = parent;
+        output += ((key !== '') ? (key + '|') : '') + value + "\n";
       }
     }
   }
@@ -526,7 +535,8 @@ Drupal.optionsElement.prototype.optionsToText = function() {
  * Given a text string, convert it to an object.
  */
 Drupal.optionsElement.prototype.optionsFromText = function() {
-  var rows = this.manualOptionsElement.value.match(/^.*$/mg);
+  // Use jQuery val() instead of value because it fixes Windows line breaks.
+  var rows = $(this.manualOptionsElement).val().match(/^.*$/mg);
   var parentKey = '';
   var options = [];
   var defaultValues = {};
@@ -550,8 +560,8 @@ Drupal.optionsElement.prototype.optionsFromText = function() {
     }
   }
 
-  for (var n in rows) {
-    var row = rows[n].replace(/^[ ]*(.*?)[ ]*$/, '$1'); // trim().
+  for (var n = 0; n < rows.length; n++) {
+    var row = rows[n].replace(/^[ \r\n]*(.*?)[ \r\n]*$/, '$1'); // trim().
     var key = '';
     var value = '';
     var checked = false;
@@ -658,7 +668,7 @@ Drupal.theme.prototype.optionsElement = function(optionsElement) {
     }
     output += '</td><td class="' + (keyType == 'textfield' ? 'option-key-cell' : 'option-value-cell') +'">';
     output += '<input type="' + keyType + '" class="' + (keyType == 'textfield' ? 'form-text ' : '') + 'option-key" value="' + key + '" />';
-    output += keyType == 'textfield' ? '</td><td class="option-value-call">' : '';
+    output += keyType == 'textfield' ? '</td><td class="option-value-cell">' : '';
     output += '<input class="form-text option-value" type="text" value="' + value + '" />';
     output += '</td><td class="option-actions-cell">'
     output += '<a class="add" title="' + Drupal.t('Add new option') + '" href="#"' + (status == 'disabled' ? ' style="display: none"' : '') + '><span class="add">' + Drupal.t('Add') + '</span></a>';
