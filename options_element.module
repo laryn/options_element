@@ -7,7 +7,7 @@
  */
 
 /**
- * Implementation of hook_elements().
+ * Implements hook_element_info().
  *
  * Defines the #type = 'options' form element type.
  *
@@ -74,7 +74,7 @@
  *   );
  *   @endcode
  */
-function options_element_elements() {
+function options_element_element_info() {
   $type = array();
 
   $type['options'] = array(
@@ -98,7 +98,7 @@ function options_element_elements() {
 function options_element_theme() {
   return array(
     'options' => array(
-      'arguments' => array('element' => NULL),
+      'render element' => 'element',
       'file' => 'options_element.inc',
     ),
   );

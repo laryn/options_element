@@ -5,12 +5,7 @@ div.options-widget .draggable a.tabledrag-handle {
 }
 
 div.form-options fieldset.options {
-  margin-bottom: -2em;
-}
-
-div.options-widget table,
-div.options-widget tbody {
-  border: none;
+  margin-bottom: 0;
 }
 
 div.options-widget a.add span,
@@ -59,6 +54,16 @@ div.form-option-add a {
 div.options-widget table {
   width: 100%;
   margin: 0;
+}
+
+div.options-widget table,
+div.options-widget tbody {
+  border: none;
+}
+
+div.options-widget table tr {
+  border-style: none;
+  background: none;
 }
 
 div.options-widget table td {

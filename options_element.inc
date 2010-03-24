@@ -10,14 +10,12 @@
 /**
  * Theme an options element.
  */
-function theme_options($element) {
-  drupal_add_js('misc/tabledrag.js');
-  drupal_add_js(drupal_get_path('module', 'options_element') .'/options_element.js');
-  drupal_add_css(drupal_get_path('module', 'options_element') .'/options_element.css');
+function theme_options($variables) {
+  $element = $variables['element'];
 
   $classes = array();
   if (isset($element['#attributes']['class'])) {
-    $classes[] = $element['#attributes']['class'];
+    $classes = $element['#attributes']['class'];
   }
 
   $classes[] = 'form-options';
@@ -54,20 +52,20 @@ function theme_options($element) {
 
   $output = '';
   $output .= '<div class="' . implode(' ', $classes) .'">';
-  $output .= theme('fieldset', array(
+  $output .= theme('fieldset', array('element' => array(
     '#title' => t('Options'),
     '#collapsible' => FALSE,
     '#children' => $options,
-    '#attributes' => array('class' => 'options'),
-  ));
+    '#attributes' => array('class' => array('options')),
+  )));
 
   if (!empty($settings)) {
-    $output .= theme('fieldset', array(
+    $output .= theme('fieldset', array('element' => array(
       '#title' => t('Option settings'),
       '#collapsible' => FALSE,
       '#children' => $settings,
-      '#attributes' => array('class' => 'option-settings'),
-    ));
+      '#attributes' => array('class' => array('option-settings')),
+    )));
   }
   $output .= '</div>';
 
@@ -86,13 +84,22 @@ function _form_options_expand($element) {
   $element['#tree'] = TRUE;
   $element['#theme'] = 'options';
 
+  $path = drupal_get_path('module', 'options_element');
+  $element['#attached']['js'] = array(
+    'misc/tabledrag.js' => array('weight' => JS_LIBRARY + 5),
+    $path . '/options_element.js',
+  );
+  $element['#attached']['css'] = array(
+    $path . '/options_element.css',
+  );
+
   // Add the key type toggle checkbox.
   if (!isset($element['custom_keys']) && $element['#key_type'] != 'custom' && !empty($element['#key_type_toggle'])) {
     $element['custom_keys'] = array(
       '#title' => is_string($element['#key_type_toggle']) ? $element['#key_type_toggle'] : t('Customize keys'),
       '#type' => 'checkbox',
       '#default_value' => $element['#key_type_toggled'],
-      '#attributes' => array('class' => 'key-type-toggle'),
+      '#attributes' => array('class' => array('key-type-toggle')),
       '#description' => t('Customizing the keys will allow you to save one value internally while showing a different option to the user.'),
     );
   }
@@ -103,7 +110,7 @@ function _form_options_expand($element) {
       '#title' => is_string($element['#multiple_toggle']) ? $element['#multiple_toggle'] : t('Allow multiple values'),
       '#type' => 'checkbox',
       '#default_value' => !empty($element['#multiple']),
-      '#attributes' => array('class' => 'multiple-toggle'),
+      '#attributes' => array('class' => array('multiple-toggle')),
       '#description' => t('Multiple values will let users select multiple items in this list.'),
     );
   }
@@ -169,7 +176,7 @@ function _form_options_expand($element) {
 function _form_options_validate($element, &$form_state) {
   // Convert text to an array of options.
   $duplicates = array();
-  $options = form_options_from_text($element['#value']['text'], $element['#key_type'], empty($element['#optgroups']), $duplicates);
+  $options = form_options_from_text($element['#value']['options_text'], $element['#key_type'], empty($element['#optgroups']), $duplicates);
 
   // Check if a key is used multiple times.
   if (count($duplicates) == 1) {
@@ -177,7 +184,7 @@ function _form_options_validate($element, &$form_state) {
   }
   elseif (!empty($duplicates)) {
     array_walk($duplicates, 'check_plain');
-    $duplicate_list = theme('item_list', $duplicates);
+    $duplicate_list = theme('item_list', array('items' => $duplicates));
     form_error($element, t('The following keys have been used multiple times. Each key must be unique to display properly.') . $duplicate_list);
   }
 
