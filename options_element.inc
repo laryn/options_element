@@ -115,7 +115,7 @@ function _form_options_expand($element) {
     );
   }
 
-  // Add the main textfield for adding options.
+  // Add the main textarea for adding options.
   if (!isset($element['options'])) {
     $element['options_field'] = array(
       '#type' => 'textarea',
@@ -124,6 +124,7 @@ function _form_options_expand($element) {
       '#rows' => 5,
       '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
       '#description' => t('List options one option per line.'),
+      '#attributes' => $element['#disabled'] ? array('readonly' => 'readonly') : array(),
     );
 
     // If validation fails, reload the user's text even if it's not valid.
@@ -276,7 +277,6 @@ function _form_type_options_value(&$element, $edit = FALSE) {
 function _form_options_to_text($options, $key_type) {
   $output = '';
   $previous_key = false;
-  $all_options = array();
 
   foreach ($options as $key => $value) {
     // Convert groups.

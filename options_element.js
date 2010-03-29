@@ -38,6 +38,7 @@ Drupal.optionsElement = function(element) {
   this.keyType = element.className.replace(/^.*?options-key-type-([a-z]+).*?$/, '$1');
   this.customKeys = Boolean(element.className.match(/options-key-custom/));
   this.identifier = this.manualOptionsElement.id + '-widget';
+  this.enabled = $(this.manualOptionsElement).attr('readonly') == '';
 
   // Warning messages.
   this.keyChangeWarning = Drupal.t('Custom keys have been specified in this list. Removing these custom keys may change way data is stored. Are you sure you wish to remove these custom keys?');
@@ -128,7 +129,7 @@ Drupal.optionsElement.prototype.updateWidgetElements = function() {
   $(this.optionsElement).replaceWith(newElement);
   this.optionsElement = newElement;
 
-  // Manually setup table drag for the created table.
+  // Manually set up table drag for the created table.
   Drupal.settings.tableDrag = Drupal.settings.tableDrag || {};
   Drupal.settings.tableDrag[this.identifier] = {
     'option-depth': {
@@ -204,7 +205,7 @@ Drupal.optionsElement.prototype.updateWidgetElements = function() {
     }
   };
 
-  // Set the tab indexes.
+  // Update the default value and optgroups.
   this.updateOptionElements();
 }
 
@@ -262,7 +263,6 @@ Drupal.optionsElement.prototype.updateManualElements = function() {
  * - Disable options for optgroups if indented.
  * - Disable add and delete links if indented.
  * - Match the default value radio button value to the key of the text element.
- * - Reset the taborder.
  */
 Drupal.optionsElement.prototype.updateOptionElements = function() {
   var self = this;
@@ -319,6 +319,11 @@ Drupal.optionsElement.prototype.updateOptionElements = function() {
   // Do not allow the last item to be removed.
   if ($rows.size() == 1) {
     $rows.find('a.remove').css('display', 'none')
+  }
+
+  // Disable items if needed.
+  if (this.enabled == false) {
+    this.disable();
   }
 }
 
@@ -402,6 +407,30 @@ Drupal.optionsElement.prototype.toggleMode = function() {
     $(this.optionsToggleElement).find('a').text(Drupal.t('Manual entry'));
   }
 }
+
+/**
+ * Enable the changing of options.
+ */
+Drupal.optionsElement.prototype.enable = function() {
+  this.enabled = true;
+  $(this.manualOptionsElement).attr('readonly', '');
+  $(this.element).removeClass('options-disabled');
+
+  $('a.add, a.remove, a.tabledrag-handle, div.form-option-add a', this.element).css('display', '');
+  $('input.form-text', this.optionsElement).attr('disabled', '');
+};
+
+/**
+ * Disable the changing of options.
+ */
+Drupal.optionsElement.prototype.disable = function() {
+  this.enabled = false;
+  $(this.manualOptionsElement).attr('readonly', true);
+  $(this.element).addClass('options-disabled');
+
+  $('a.add, a.remove, a.tabledrag-handle, div.form-option-add a', this.element).css('display', 'none');
+  $('input.form-text', this.optionsElement).attr('disabled', 'disabled');
+};
 
 /**
  * Enable entering of custom key values.

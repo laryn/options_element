@@ -87,6 +87,7 @@ function options_element_element_info() {
     '#key_type_toggle' => NULL,
     '#key_type_toggled' => FALSE,
     '#element_validate' => array('form_options_validate'),
+    '#disabled' => FALSE,
   );
 
   return $type;
