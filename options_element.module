@@ -18,17 +18,17 @@
  *
  * @code
  * $element['options'] = array(
- *   'type' => 'options',
- *   'limit' => 20,
- *   'optgroups' => FALSE,
- *   'multiple' => FALSE,
- *   'options' => array(
+ *   '#type' => 'options',
+ *   '#limit' => 20,
+ *   '#optgroups' => FALSE,
+ *   '#multiple' => FALSE,
+ *   '#options' => array(
  *     'foo' => 'foo',
  *     'bar' => 'bar',
  *     'baz' => 'baz',
  *   ),
- *   'default_value' => 'foo'
- *   'key_type' => 'associative',
+ *   '#default_value' => 'foo'
+ *   '#key_type' => 'associative',
  * );
  * @endcode
  *
