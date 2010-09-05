@@ -82,6 +82,7 @@ function options_element_element_info() {
     '#process' => array('form_options_expand'),
     '#limit' => 100,
     '#optgroups' => TRUE,
+    '#multiple' => FALSE,
     '#options' => array(),
     '#key_type' => 'mixed',
     '#key_type_toggle' => NULL,

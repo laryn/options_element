@@ -245,7 +245,7 @@ function _form_type_options_value(&$element, $edit = FALSE) {
 
     // Convert default value.
     if (isset($edit['default_value_field'])) {
-      if ($element['#multiple']) {
+      if (!empty($edit['multiple'])) {
         $default_value = array();
         $default_items = explode(',', $edit['default_value_field']);
         foreach ($default_items as $key) {
