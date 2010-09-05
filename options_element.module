@@ -83,7 +83,7 @@ function options_element_element_info() {
     '#limit' => 100,
     '#optgroups' => TRUE,
     '#options' => array(),
-    '#key_type' => 'associative',
+    '#key_type' => 'mixed',
     '#key_type_toggle' => NULL,
     '#key_type_toggled' => FALSE,
     '#element_validate' => array('form_options_validate'),

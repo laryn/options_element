@@ -618,7 +618,7 @@ Drupal.optionsElement.prototype.optionsFromText = function() {
         hasChildren = true;
       }
     }
-    // Row is a key|value pair.
+    // Check if this row is a key|value pair.
     else if ((this.keyType == 'mixed' || this.keyType == 'numeric' || this.keyType == 'custom') && (matches = row.match(/^([^|]+)\|(.*)$/))) {
       key = matches[1];
       value = matches[2];
