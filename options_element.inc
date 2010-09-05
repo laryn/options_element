@@ -256,7 +256,7 @@ function _form_type_options_value(&$element, $edit = FALSE) {
         }
       }
       else {
-        $default_value = trim($edit['default_value_field']);
+        $default_value = _form_options_search(trim($edit['default_value_field']), $options);
       }
     }
 
