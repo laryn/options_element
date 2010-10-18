@@ -125,6 +125,7 @@ function _form_options_expand($element) {
       '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
       '#description' => t('List options one option per line.'),
       '#attributes' => $element['#disabled'] ? array('readonly' => 'readonly') : array(),
+      '#wysiwyg' => FALSE, // Prevent CKeditor from trying to hijack.
     );
 
     // If validation fails, reload the user's text even if it's not valid.
