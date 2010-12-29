@@ -114,6 +114,12 @@ function _form_options_expand($element) {
       '#description' => t('Multiple values will let users select multiple items in this list.'),
     );
   }
+  // If the element had a custom interface for toggling whether or not multiple
+  // values are accepted, make sure that form_type_options_value() knows to use
+  // it.
+  if (isset($element['multiple']) && empty($element['#multiple_toggle'])) {
+    $element['#multiple_toggle'] = TRUE;
+  }
 
   // Add the main textarea for adding options.
   if (!isset($element['options'])) {
@@ -246,7 +252,13 @@ function _form_type_options_value(&$element, $edit = FALSE) {
 
     // Convert default value.
     if (isset($edit['default_value_field'])) {
-      if (!empty($edit['multiple'])) {
+      // If the element supports toggling whether or not it will accept
+      // multiple values, use the value that was passed in via $edit (keeping
+      // in mind that this value may not be set, if a checkbox was used to
+      // configure it). Otherwise, use the current setting stored with the
+      // element itself.
+      $multiple = !empty($element['#multiple_toggle']) ? !empty($edit['multiple']) : !empty($element['#multiple']);
+      if ($multiple) {
         $default_value = array();
         $default_items = explode(',', $edit['default_value_field']);
         foreach ($default_items as $key) {
