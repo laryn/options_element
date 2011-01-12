@@ -87,6 +87,7 @@ function _form_options_expand($element) {
   $path = drupal_get_path('module', 'options_element');
   $element['#attached']['js'] = array(
     'misc/tabledrag.js' => array('weight' => JS_LIBRARY + 5),
+    'misc/jquery.cookie.js' => array('weight' => JS_LIBRARY + 5),
     $path . '/options_element.js',
   );
   $element['#attached']['css'] = array(
