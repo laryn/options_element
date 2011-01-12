@@ -589,7 +589,7 @@ Drupal.optionsElement.prototype.optionsFromText = function() {
   if (this.manualDefaultValueElement) {
     if (this.multiple) {
       var defaults = this.manualDefaultValueElement.value.split(',');
-      for (var n = 0; n < options.length; n++) {
+      for (var n = 0; n < defaults.length; n++) {
         var defaultValue = defaults[n].replace(/^[ ]*(.*?)[ ]*$/, '$1'); // trim().
         defaultValues[defaultValue] = defaultValue;
       }
