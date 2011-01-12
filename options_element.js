@@ -185,6 +185,9 @@ Drupal.optionsElement.prototype.updateWidgetElements = function() {
   // Attach behaviors as normal to the new widget.
   Drupal.attachBehaviors(this.optionsElement);
 
+  // Remove the "Show row weights" link
+  $(".tabledrag-toggle-weight-wrapper").remove();
+
   // Add an onDrop action to the table drag instance.
   Drupal.tableDrag[this.identifier].onDrop = function() {
     // Update the checkbox/radio buttons for selecting default values.
