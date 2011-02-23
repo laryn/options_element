@@ -162,6 +162,7 @@ function _form_options_expand($element) {
       '#title' => t('Default value'),
       '#type' => 'textfield',
       '#size' => 60,
+      '#maxlength' => 1024,
       '#value' => isset($element['#default_value']) ? ($element['#multiple'] ? implode(', ', (array) $element['#default_value']) : $element['#default_value']) : '',
       '#description' => t('Specify the keys that should be selected by default.'),
     );
