@@ -701,15 +701,15 @@ Drupal.theme.prototype.optionsElement = function(optionsElement) {
     for (var n = 0; n < indent; n++) {
       output += Drupal.theme('tableDragIndentation');
     }
-    output += '<input type="hidden" class="option-parent" value="' + parent + '" />';
-    output += '<input type="hidden" class="option-depth" value="' + indent + '" />';
+    output += '<input type="hidden" class="option-parent" value="' + parent.replace(/"/g, '&quot;') + '" />';
+    output += '<input type="hidden" class="option-depth" value="' + indent.replace(/"/g, '&quot;') + '" />';
     if (hasDefault) {
-      output += '<input type="' + defaultType + '" name="' + optionsElement.identifier + '-default" class="form-radio option-default" value="' + key + '"' + (status == 'checked' ? ' checked="checked"' : '') + (status == 'disabled' ? ' disabled="disabled"' : '') + ' />';
+      output += '<input type="' + defaultType + '" name="' + optionsElement.identifier + '-default" class="form-radio option-default" value="' + key.replace(/"/g, '&quot;') + '"' + (status == 'checked' ? ' checked="checked"' : '') + (status == 'disabled' ? ' disabled="disabled"' : '') + ' />';
     }
     output += '</td><td class="' + (keyType == 'textfield' ? 'option-key-cell' : 'option-value-cell') +'">';
-    output += '<input type="' + keyType + '" class="' + (keyType == 'textfield' ? 'form-text ' : '') + 'option-key" value="' + key + '" />';
+    output += '<input type="' + keyType + '" class="' + (keyType == 'textfield' ? 'form-text ' : '') + 'option-key" value="' + key.replace(/"/g, '&quot;') + '" />';
     output += keyType == 'textfield' ? '</td><td class="option-value-cell">' : '';
-    output += '<input class="form-text option-value" type="text" value="' + value + '" />';
+    output += '<input class="form-text option-value" type="text" value="' + value.replace(/"/g, '&quot;') + '" />';
     output += '</td><td class="option-actions-cell">'
     output += '<a class="add" title="' + Drupal.t('Add new option') + '" href="#"' + (status == 'disabled' ? ' style="display: none"' : '') + '><span class="add">' + Drupal.t('Add') + '</span></a>';
     output += '<a class="remove" title="' + Drupal.t('Remove option') + '" href="#"' + (status == 'disabled' ? ' style="display: none"' : '') + '><span class="remove">' + Drupal.t('Remove') + '</span></a>';
