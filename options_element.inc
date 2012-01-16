@@ -274,6 +274,9 @@ function _form_type_options_value(&$element, $edit = FALSE) {
         $default_value = _form_options_search(trim($edit['default_value_field']), $options);
       }
     }
+    else {
+      $default_value = NULL;
+    }
 
     return array(
       'options' => $options,
