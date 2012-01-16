@@ -37,6 +37,9 @@ function theme_options($variables) {
   if (isset($element['default_value_field'])) {
     $options .= drupal_render($element['default_value_field']);
   }
+  if (isset($element['default_value_pattern'])) {
+    $options .= drupal_render($element['default_value_pattern']);
+  }
 
   $settings = '';
   if (isset($element['custom_keys'])) {
@@ -170,6 +173,15 @@ function _form_options_expand($element) {
     }
   }
 
+  // Add the field for storing a default value pattern.
+  if ($element['#default_value_pattern']) {
+    $element['default_value_pattern'] = array(
+      '#type' => 'hidden',
+      '#value' => $element['#default_value_pattern'],
+      '#attributes' => array('class' => array('default-value-pattern')),
+    );
+  }
+
   // Remove properties that will confuse the FAPI.
   unset($element['#options']);
   $element['#required'] = FALSE;
@@ -264,14 +276,14 @@ function _form_type_options_value(&$element, $edit = FALSE) {
         $default_items = explode(',', $edit['default_value_field']);
         foreach ($default_items as $key) {
           $key = trim($key);
-          $value = _form_options_search($key, $options);
+          $value = _form_options_search($key, $options, $element['#default_value_pattern']);
           if (!is_null($value)) {
             $default_value[] = $value;
           }
         }
       }
       else {
-        $default_value = _form_options_search(trim($edit['default_value_field']), $options);
+        $default_value = _form_options_search(trim($edit['default_value_field']), $options, $element['#default_value_pattern']);
       }
     }
     else {
@@ -412,13 +424,16 @@ function _form_options_from_text($text, $key_type, $flat = FALSE, &$duplicates =
 /**
  * Recursive function for finding default value keys. Matches on keys or values.
  */
-function _form_options_search($needle, $haystack) {
+function _form_options_search($needle, $haystack, $include_pattern) {
   if (isset($haystack[$needle])) {
+    return $needle;
+  }
+  elseif ($include_pattern && preg_match('/' . $include_pattern . '/', $needle)) {
     return $needle;
   }
   foreach ($haystack as $key => $value) {
     if (is_array($value)) {
-      return _form_options_search($needle, $value);
+      return _form_options_search($needle, $value, $include_pattern);
     }
     elseif ($value == $needle) {
       return $key;

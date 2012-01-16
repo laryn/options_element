@@ -39,6 +39,10 @@ div.options-widget a.remove {
   background-image: url(delete.png);
 }
 
+div.default-value-pattern-match {
+  float: left; /* RTL */
+}
+
 div.form-options-manual,
 div.form-option-add {
   text-align: right; /* RTL */

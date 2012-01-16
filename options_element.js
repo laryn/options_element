@@ -38,6 +38,11 @@ Drupal.optionsElement = function(element) {
   this.customKeys = Boolean(element.className.match(/options-key-custom/));
   this.identifier = this.manualOptionsElement.id + '-widget';
   this.enabled = $(this.manualOptionsElement).attr('readonly') == '';
+  this.defaultValuePattern = $(element).find('input.default-value-pattern').val();
+
+  if (this.defaultValuePattern) {
+    this.defaultValuePattern = new RegExp(this.defaultValuePattern)
+  }
 
   // Warning messages.
   this.keyChangeWarning = Drupal.t('Custom keys have been specified in this list. Removing these custom keys may change way data is stored. Are you sure you wish to remove these custom keys?');
@@ -252,8 +257,14 @@ Drupal.optionsElement.prototype.updateManualElements = function() {
 
   // Update with the new text and trigger the change action on the field.
   this.optionsToText();
+
   if (this.manualDefaultValueElement) {
-    this.manualDefaultValueElement.value = multiple ? defaultValue.join(', ') : defaultValue;
+    // Don't wipe out custom pattern-matched default values.
+    defaultValue = multiple ? defaultValue.join(', ') : defaultValue;
+    if (defaultValue || !(this.defaultValuePattern && this.defaultValuePattern.test(this.manualDefaultValueElement.value))) {
+      this.manualDefaultValueElement.value = defaultValue;
+      $('.default-value-pattern-match', this.element).remove();
+    }
   }
 
   $(this.manualOptionsElement).change();
@@ -702,7 +713,7 @@ Drupal.theme.prototype.optionsElement = function(optionsElement) {
       output += Drupal.theme('tableDragIndentation');
     }
     output += '<input type="hidden" class="option-parent" value="' + parent.replace(/"/g, '&quot;') + '" />';
-    output += '<input type="hidden" class="option-depth" value="' + indent.replace(/"/g, '&quot;') + '" />';
+    output += '<input type="hidden" class="option-depth" value="' + indent + '" />';
     if (hasDefault) {
       output += '<input type="' + defaultType + '" name="' + optionsElement.identifier + '-default" class="form-radio option-default" value="' + key.replace(/"/g, '&quot;') + '"' + (status == 'checked' ? ' checked="checked"' : '') + (status == 'disabled' ? ' disabled="disabled"' : '') + ' />';
     }
@@ -753,9 +764,18 @@ Drupal.theme.prototype.optionsElement = function(optionsElement) {
 
   output += '</tbody>';
   output += '</table>';
-  output += '<div>';
+
+  if (optionsElement.defaultValuePattern && optionsElement.manualDefaultValueElement && optionsElement.defaultValuePattern.test(optionsElement.manualDefaultValueElement.value)) {
+    output += Drupal.theme('optionsElementPatternMatch', optionsElement.manualDefaultValueElement.value);
+  }
+
+  output += '</div>';
 
   return output;
+};
+
+Drupal.theme.prototype.optionsElementPatternMatch = function(matchedValue) {
+  return '<div class="default-value-pattern-match"><span>' + Drupal.t('Manual default value') + '</span>: ' + matchedValue + '</div>';
 };
 
 Drupal.theme.prototype.optionsElementAdd = function() {
