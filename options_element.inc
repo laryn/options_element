@@ -264,7 +264,8 @@ function _form_type_options_value(&$element, $edit = FALSE) {
         $default_items = explode(',', $edit['default_value_field']);
         foreach ($default_items as $key) {
           $key = trim($key);
-          if ($value = _form_options_search($key, $options)) {
+          $value = _form_options_search($key, $options);
+          if (!is_null($value)) {
             $default_value[] = $value;
           }
         }
@@ -413,10 +414,10 @@ function _form_options_search($needle, $haystack) {
     return $needle;
   }
   foreach ($haystack as $key => $value) {
-    if (is_array($value) && ($return = _form_options_search($needle, $value))) {
-      return $return;
+    if (is_array($value)) {
+      return _form_options_search($needle, $value);
     }
-    if ($value == $needle) {
+    elseif ($value == $needle) {
       return $key;
     }
   }
