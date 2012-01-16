@@ -156,7 +156,7 @@ function _form_options_expand($element) {
   }
 
   // Add the field for storing default values.
-  if ($element['#default_value'] !== FALSE && !isset($element['default_value_field'])) {
+  if ($element['#default_value_allowed'] && !isset($element['default_value_field'])) {
     $element['default_value_field'] = array(
       '#title' => t('Default value'),
       '#type' => 'textfield',

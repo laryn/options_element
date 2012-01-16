@@ -64,6 +64,9 @@
  *   the "none" key type.
  * - key_type_toggled: Determine if the toggle checkbox is set or not by
  *   default.
+ * - default_value_allowed: Indicates whether the end user should be able to
+ *   modify the default value when editing the options list. Defaults to TRUE.
+ *
  *   @code
  *   $element['options'] = array(
  *     '#type' => 'options',
@@ -86,6 +89,7 @@ function options_element_element_info() {
     '#key_type' => 'mixed',
     '#key_type_toggle' => NULL,
     '#key_type_toggled' => FALSE,
+    '#default_value_allowed' => TRUE,
     '#element_validate' => array('form_options_validate'),
     '#disabled' => FALSE,
   );
