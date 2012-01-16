@@ -41,7 +41,7 @@ Drupal.optionsElement = function(element) {
   this.defaultValuePattern = $(element).find('input.default-value-pattern').val();
 
   if (this.defaultValuePattern) {
-    this.defaultValuePattern = new RegExp(this.defaultValuePattern)
+    this.defaultValuePattern = new RegExp(this.defaultValuePattern);
   }
 
   // Warning messages.
