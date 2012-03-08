@@ -397,6 +397,11 @@ function _form_options_from_text($text, $key_type, $flat = FALSE, &$duplicates =
   $options = array();
   $new_key = 0;
   foreach ($items as $item) {
+    if (is_int($item['key'] * 1)) {
+      $new_key = max($item['key'], $new_key);
+    }
+  }
+  foreach ($items as $item) {
     // Assign a key if needed.
     if ($key_type == 'none') {
       $item['key'] = $new_key++;
