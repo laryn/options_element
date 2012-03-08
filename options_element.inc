@@ -290,12 +290,17 @@ function _form_type_options_value(&$element, $edit = FALSE) {
       $default_value = NULL;
     }
 
-    return array(
+    $return = array(
       'options' => $options,
       'default_value' => $default_value,
       'options_text' => $edit['options_field'],
-      'default_value_text' => $edit['default_value_field'],
     );
+
+    if (isset($edit['default_value_field'])) {
+      $return['default_value_text'] = $edit['default_value_field'];
+    }
+
+    return $return;
   }
 }
 
