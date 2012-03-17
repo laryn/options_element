@@ -395,10 +395,11 @@ function _form_options_from_text($text, $key_type, $flat = FALSE, &$duplicates =
 
   // Expand the list into a nested array, assign keys and check duplicates.
   $options = array();
-  $new_key = 0;
+  $new_key = 1;
   foreach ($items as $item) {
-    if (is_int($item['key'] * 1)) {
-      $new_key = max($item['key'], $new_key);
+    $int_key = $item['key'] * 1;
+    if (is_int($int_key)) {
+      $new_key = max($int_key, $new_key);
     }
   }
   foreach ($items as $item) {
