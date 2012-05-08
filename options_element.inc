@@ -138,8 +138,8 @@ function _form_options_expand($element) {
     );
 
     // If validation fails, reload the user's text even if it's not valid.
-    if (isset($element['#value']['text'])) {
-      $element['options_field']['#value'] = $element['#value']['text'];
+    if (isset($element['#value']['options_text'])) {
+      $element['options_field']['#value'] = $element['#value']['options_text'];
     }
     // Most of the time, we'll be converting the options array into the text.
     else {
