@@ -136,6 +136,7 @@ function _form_options_expand($element) {
       '#attributes' => $element['#disabled'] ? array('readonly' => 'readonly') : array(),
       '#wysiwyg' => FALSE, // Prevent CKeditor from trying to hijack.
     );
+    $element['#disabled'] = FALSE;
 
     // If validation fails, reload the user's text even if it's not valid.
     if (isset($element['#value']['options_text'])) {
