@@ -12,7 +12,7 @@
  *
  * The 'options' form element type is useful when collecting a series of
  * values in a list. The values within the list may optionally have unique
- * keys, such as that in a array structure. In addition, a default choice
+ * keys, such as that in an array structure. In addition, a default choice
  * (or several default choices) may be selected by the user.
  *
  * @code
