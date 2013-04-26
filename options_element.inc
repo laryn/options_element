@@ -54,7 +54,7 @@ function theme_options($variables) {
 
   $output = '';
   $output .= '<div class="' . implode(' ', $classes) .'">';
-  $output .= theme('fieldset', array('element' => array(
+  $output .= theme('container', array('element' => array(
     '#title' => t('Options'),
     '#collapsible' => FALSE,
     '#children' => $options,
