@@ -182,7 +182,6 @@ function _form_options_expand($element) {
 
   // Remove properties that will confuse the FAPI.
   unset($element['#options']);
-  $element['#required'] = FALSE;
 
   return $element;
 }
