@@ -353,14 +353,14 @@ function _form_options_to_text($options, $key_type) {
 function _form_options_from_text($text, $key_type, $flat = FALSE, &$duplicates = array()) {
   $keys = array();
   $items = array();
-  $rows = array_filter(explode("\n", trim($text)));
+  $rows = array_filter(explode("\n", trim($text)), 'strlen');
   $group = FALSE;
   foreach ($rows as $row) {
     $row = trim($row);
     $matches = array();
 
     // Check for a simple empty row.
-    if (empty($row)) {
+    if (!strlen($row)) {
       continue;
     }
     // Check if this row is a group.
