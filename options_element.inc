@@ -30,6 +30,12 @@ function theme_options($variables) {
     $classes[] = 'options-multiple';
   }
 
+  // Replace the error class from wrapper div, which doesn't display well with
+  // complex elements like Options Element.
+  if ($key = array_search('error', $element['#attributes']['class'], TRUE)) {
+    $element['#attributes']['class'][$key] = 'options-error';
+  }
+
   $options = '';
   $options .= drupal_render($element['options_field']);
   if (isset($element['default_value_field'])) {
