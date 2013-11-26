@@ -810,4 +810,20 @@ Drupal.theme.tableDragChangedWarning = function() {
   return '<span></span>';
 };
 
+/**
+ * Field module support for Options widgets.
+ */
+Drupal.behaviors.optionsElementFieldUI = {};
+Drupal.behaviors.optionsElementFieldUI.attach = function(context) {
+  var $cardinalityField = $(context).find('#edit-field-cardinality');
+  if ($cardinalityField.length) {
+    $cardinalityField.change(function() {
+      var optionsElementId = $(this).parents('fieldset:first').find('.form-type-options table').attr('id');
+      if (Drupal.optionElements[optionsElementId]) {
+        Drupal.optionElements[optionsElementId].setMultiple(this.value != 1);
+      }
+    }).trigger('change');
+  }
+}
+
 })(jQuery);
