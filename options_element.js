@@ -318,10 +318,8 @@ Drupal.optionsElement.prototype.updateOptionElements = function() {
       $(this).find('a.add, a.remove').css('display', '');
       $(defaultInput).attr('disabled', false);
 
-      // Hide the key column for the optgroup. It would be nice if hiding
-      // columns worked in IE7, but for now this only works in IE8 and other
-      // standards-compliant browsers.
-      if (self.customKeys && (!$.browser.msie || $.browser.version >= 8)) {
+      // Hide the key column for the optgroup.
+      if (self.customKeys) {
         $(previousRow).find('td.option-key-cell').css('display', 'none');
         $(previousRow).find('td.option-value-cell').attr('colspan', 2);
       }
@@ -331,8 +329,8 @@ Drupal.optionsElement.prototype.updateOptionElements = function() {
       $(defaultInput).attr('disabled', false);
       $(this).removeClass('optgroup').find('a.add, a.remove').css('display', '');
 
-      // Hide the key column. See note above for compatibility concerns.
-      if (self.customKeys && (!$.browser.msie || $.browser.version >= 8)) {
+      // Hide the key column.
+      if (self.customKeys) {
         $(this).find('td.option-key-cell').css('display', '');
         $(this).find('td.option-value-cell').attr('colspan', '');
       }
