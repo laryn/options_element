@@ -92,8 +92,8 @@ function _form_options_expand($element) {
 
   $path = backdrop_get_path('module', 'options_element');
   $element['#attached']['js'] = array(
-    'misc/tabledrag.js' => array('group' => JS_LIBRARY, 'weight' => 5),
-    'misc/jquery.cookie.js' => array('group' => JS_LIBRARY),
+    'core/misc/tabledrag.js' => array('group' => JS_LIBRARY, 'weight' => 5),
+    'core/misc/jquery.cookie.js' => array('group' => JS_LIBRARY),
     $path . '/js/options_element.js',
   );
   $element['#attached']['css'] = array(

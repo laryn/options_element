@@ -7,6 +7,8 @@ interface for specifying options. Developers may use $element['#type'] =
 'options' in their own modules. If JavaScript is disabled, any 'options_element' 
 will degrade to the standard textarea for specifying options.
 
+![Options Element](https://github.com/backdrop-contrib/options_element/blob/1.x-1.x/images/options-element-screenshot.jpg "Options Element example")
+
 ##Issues
 
 Bugs and Feature requests should be reported in the
