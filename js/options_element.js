@@ -6,26 +6,26 @@
 
 (function($) {
 
-Drupal.optionElements = Drupal.optionElements || {};
-Drupal.behaviors.optionsElement = Drupal.behaviors.optionsElement || {};
+Backdrop.optionElements = Backdrop.optionElements || {};
+Backdrop.behaviors.optionsElement = Backdrop.behaviors.optionsElement || {};
 
 // We need to check/set HTML properties frequently, such as the disabled and
 // checked state of elements. In jQuery 1.6+, the "prop" method was added for
 // this purpose, but in earlier versions you had to use "attr".
 $.fn.oeProp = $.fn.prop ? $.fn.prop : $.fn.attr;
 
-Drupal.behaviors.optionsElement.attach = function(context) {
+Backdrop.behaviors.optionsElement.attach = function(context) {
   $('div.form-options:not(.options-element-processed)', context).each(function() {
     $(this).addClass('options-element-processed');
-    var optionsElement = new Drupal.optionsElement(this);
-    Drupal.optionElements[optionsElement.identifier] = optionsElement;
+    var optionsElement = new Backdrop.optionsElement(this);
+    Backdrop.optionElements[optionsElement.identifier] = optionsElement;
   });
 };
 
 /**
  * Constructor for an options element.
  */
-Drupal.optionsElement = function(element) {
+Backdrop.optionsElement = function(element) {
   var self = this;
 
   // Find the original "manual" fields.
@@ -50,13 +50,13 @@ Drupal.optionsElement = function(element) {
   }
 
   // Warning messages.
-  this.keyChangeWarning = Drupal.t('Custom keys have been specified in this list. Removing these custom keys may change way data is stored. Are you sure you wish to remove these custom keys?');
+  this.keyChangeWarning = Backdrop.t('Custom keys have been specified in this list. Removing these custom keys may change way data is stored. Are you sure you wish to remove these custom keys?');
 
   // Setup new DOM elements containing the actual options widget.
   this.optionsElement = $('<div></div>').get(0); // Temporary DOM object.
-  this.optionsToggleElement = $(Drupal.theme('optionsElementToggle')).get(0);
-  this.optionAddElement = $(Drupal.theme('optionsElementAdd')).get(0);
-  this.removeDefaultElement = $(Drupal.theme('optionsElementRemoveDefault')).get(0);
+  this.optionsToggleElement = $(Backdrop.theme('optionsElementToggle')).get(0);
+  this.optionAddElement = $(Backdrop.theme('optionsElementAdd')).get(0);
+  this.removeDefaultElement = $(Backdrop.theme('optionsElementRemoveDefault')).get(0);
 
   // Add the options widget and toggle elements to the page.
   $(this.manualElement).css('display', 'none').before(this.optionsElement).after(this.optionsToggleElement).after(this.optionAddElement);
@@ -122,7 +122,7 @@ Drupal.optionsElement = function(element) {
   }
 
   // Be sure to show the custom keys if we have any errors.
-  if (Drupal.settings.optionsElement && Drupal.settings.optionsElement.errors) {
+  if (Backdrop.settings.optionsElement && Backdrop.settings.optionsElement.errors) {
     this.customKeys = true;
   }
 
@@ -130,19 +130,19 @@ Drupal.optionsElement = function(element) {
   this.updateWidgetElements();
 
   // Highlight errors that may have occurred during Drupal validation.
-  if (Drupal.settings.optionsElement && Drupal.settings.optionsElement.errors) {
-    this.checkKeys(Drupal.settings.optionsElement.errors, 'error');
+  if (Backdrop.settings.optionsElement && Backdrop.settings.optionsElement.errors) {
+    this.checkKeys(Backdrop.settings.optionsElement.errors, 'error');
   }
 }
 
 /**
  * Update the widget element based on the current values of the manual elements.
  */
-Drupal.optionsElement.prototype.updateWidgetElements = function() {
+Backdrop.optionsElement.prototype.updateWidgetElements = function() {
   var self = this;
 
   // Create a new options element and replace the existing one.
-  var newElement = $(Drupal.theme('optionsElement', this)).get(0);
+  var newElement = $(Backdrop.theme('optionsElement', this)).get(0);
   if ($(this.optionsElement).css('display') == 'none') {
     $(newElement).css('display', 'none');
   }
@@ -150,8 +150,8 @@ Drupal.optionsElement.prototype.updateWidgetElements = function() {
   this.optionsElement = newElement;
 
   // Manually set up table drag for the created table.
-  Drupal.settings.tableDrag = Drupal.settings.tableDrag || {};
-  Drupal.settings.tableDrag[this.identifier] = {
+  Backdrop.settings.tableDrag = Backdrop.settings.tableDrag || {};
+  Backdrop.settings.tableDrag[this.identifier] = {
     'option-depth': {
       0: {
         action: 'depth',
@@ -166,7 +166,7 @@ Drupal.optionsElement.prototype.updateWidgetElements = function() {
 
   // Allow indentation of elements if optgroups are supported.
   if (this.optgroups) {
-    Drupal.settings.tableDrag[this.identifier]['option-parent'] = {
+    Backdrop.settings.tableDrag[this.identifier]['option-parent'] = {
       0: {
         action: 'match',
         hidden: false,
@@ -203,13 +203,13 @@ Drupal.optionsElement.prototype.updateWidgetElements = function() {
   });
 
   // Attach behaviors as normal to the new widget.
-  Drupal.attachBehaviors(this.optionsElement);
+  Backdrop.attachBehaviors(this.optionsElement);
 
   // Remove the "Show row weights" link
   $(".tabledrag-toggle-weight-wrapper").remove();
 
   // Add an onDrop action to the table drag instance.
-  Drupal.tableDrag[this.identifier].onDrop = function() {
+  Backdrop.tableDrag[this.identifier].onDrop = function() {
     // Update the checkbox/radio buttons for selecting default values.
     if (self.optgroups) {
       self.updateOptionElements();
@@ -219,7 +219,7 @@ Drupal.optionsElement.prototype.updateWidgetElements = function() {
   };
 
   // Add an onIndent action to the table drag row instances.
-  Drupal.tableDrag[this.identifier].row.prototype.onIndent = function() {
+  Backdrop.tableDrag[this.identifier].row.prototype.onIndent = function() {
     if (this.indents) {
       $(this.element).addClass('indented');
     }
@@ -235,7 +235,7 @@ Drupal.optionsElement.prototype.updateWidgetElements = function() {
 /**
  * Update the original form element based on the current state of the widget.
  */
-Drupal.optionsElement.prototype.updateManualElements = function() {
+Backdrop.optionsElement.prototype.updateManualElements = function() {
   var options = {};
 
   // Build a list of current options.
@@ -293,7 +293,7 @@ Drupal.optionsElement.prototype.updateManualElements = function() {
  * - Disable add and delete links if indented.
  * - Match the default value radio button value to the key of the text element.
  */
-Drupal.optionsElement.prototype.updateOptionElements = function() {
+Backdrop.optionsElement.prototype.updateOptionElements = function() {
   var self = this;
   var previousRow = false;
   var previousElement = false;
@@ -357,7 +357,7 @@ Drupal.optionsElement.prototype.updateOptionElements = function() {
 /**
  * Add a new option below the current row.
  */
-Drupal.optionsElement.prototype.addOption = function(currentOption) {
+Backdrop.optionsElement.prototype.addOption = function(currentOption) {
   var self = this;
   var windowHieght = $(document).height();
   var newOption = $(currentOption).clone()
@@ -373,7 +373,7 @@ Drupal.optionsElement.prototype.addOption = function(currentOption) {
   $(window).scrollTop($(window).scrollTop() + $(document).height() - windowHieght);
 
   // Make the new option draggable.
-  Drupal.tableDrag[this.identifier].makeDraggable(newOption);
+  Backdrop.tableDrag[this.identifier].makeDraggable(newOption);
 
   // Enable button for adding options.
   $('a.add', newOption).click(function() {
@@ -408,7 +408,7 @@ Drupal.optionsElement.prototype.addOption = function(currentOption) {
 /**
  * Remove the current row.
  */
-Drupal.optionsElement.prototype.removeOption = function(currentOption) {
+Backdrop.optionsElement.prototype.removeOption = function(currentOption) {
   $(currentOption).remove();
 
   this.updateOptionElements();
@@ -418,27 +418,27 @@ Drupal.optionsElement.prototype.removeOption = function(currentOption) {
 /**
  * Toggle link for switching between the JavaScript and manual entry.
  */
-Drupal.optionsElement.prototype.toggleMode = function() {
+Backdrop.optionsElement.prototype.toggleMode = function() {
   if ($(this.optionsElement).is(':visible')) {
     var height = $(this.optionsElement).height();
     $(this.optionsElement).css('display', 'none');
     $(this.optionAddElement).css('display', 'none');
     $(this.manualElement).css('display', '').find('textarea').height(height);
-    $(this.optionsToggleElement).find('a').text(Drupal.t('Normal entry'));
+    $(this.optionsToggleElement).find('a').text(Backdrop.t('Normal entry'));
   }
   else {
     this.updateWidgetElements();
     $(this.optionsElement).css('display', '');
     $(this.optionAddElement).css('display', '');
     $(this.manualElement).css('display', 'none');
-    $(this.optionsToggleElement).find('a').text(Drupal.t('Manual entry'));
+    $(this.optionsToggleElement).find('a').text(Backdrop.t('Manual entry'));
   }
 }
 
 /**
  * Enable the changing of options.
  */
-Drupal.optionsElement.prototype.enable = function() {
+Backdrop.optionsElement.prototype.enable = function() {
   this.enabled = true;
   $(this.manualOptionsElement).oeProp('readonly', false);
   $(this.element).removeClass('options-disabled');
@@ -450,7 +450,7 @@ Drupal.optionsElement.prototype.enable = function() {
 /**
  * Disable the changing of options.
  */
-Drupal.optionsElement.prototype.disable = function() {
+Backdrop.optionsElement.prototype.disable = function() {
   this.enabled = false;
   $(this.manualOptionsElement).oeProp('readonly', true);
   $(this.element).addClass('options-disabled');
@@ -462,7 +462,7 @@ Drupal.optionsElement.prototype.disable = function() {
 /**
  * Enable entering of custom key values.
  */
-Drupal.optionsElement.prototype.setCustomKeys = function(enabled) {
+Backdrop.optionsElement.prototype.setCustomKeys = function(enabled) {
   if (enabled) {
     $(this.element).addClass('options-key-custom');
   }
@@ -479,7 +479,7 @@ Drupal.optionsElement.prototype.setCustomKeys = function(enabled) {
 /**
  * Change the current key type (associative, custom, numeric, none).
  */
-Drupal.optionsElement.prototype.setKeyType = function(type) {
+Backdrop.optionsElement.prototype.setKeyType = function(type) {
   $(this.element)
     .removeClass('options-key-type-' + this.keyType)
     .addClass('options-key-type-' + type);
@@ -492,7 +492,7 @@ Drupal.optionsElement.prototype.setKeyType = function(type) {
 /**
  * Set the element's #multiple property. Boolean TRUE or FALSE.
  */
-Drupal.optionsElement.prototype.setMultiple = function(multiple) {
+Backdrop.optionsElement.prototype.setMultiple = function(multiple) {
   if (multiple) {
     $(this.element).addClass('options-multiple');
   }
@@ -510,7 +510,7 @@ Drupal.optionsElement.prototype.setMultiple = function(multiple) {
 /**
  * Highlight duplicate keys.
  */
-Drupal.optionsElement.prototype.checkKeys = function(duplicateKeys, cssClass){
+Backdrop.optionsElement.prototype.checkKeys = function(duplicateKeys, cssClass){
   $(this.optionsElement).find('input.option-key').each(function() {
     if (duplicateKeys[this.value]) {
       $(this).addClass(cssClass);
@@ -526,7 +526,7 @@ Drupal.optionsElement.prototype.checkKeys = function(duplicateKeys, cssClass){
  * which updating continuously would be a strain the server and actually slow
  * down responsiveness.
  */
-Drupal.optionsElement.prototype.pendingUpdate = function(e) {
+Backdrop.optionsElement.prototype.pendingUpdate = function(e) {
   var self = this;
 
   // Only operate on "normal" keys, excluding special function keys.
@@ -553,7 +553,7 @@ Drupal.optionsElement.prototype.pendingUpdate = function(e) {
 /**
  * Given an object of options, convert it to a text string.
  */
-Drupal.optionsElement.prototype.optionsToText = function() {
+Backdrop.optionsElement.prototype.optionsToText = function() {
   var $rows = $('tbody tr', this.optionsElement);
   var output = '';
   var inGroup = false;
@@ -598,7 +598,7 @@ Drupal.optionsElement.prototype.optionsToText = function() {
 /**
  * Given a text string, convert it to an object.
  */
-Drupal.optionsElement.prototype.optionsFromText = function() {
+Backdrop.optionsElement.prototype.optionsFromText = function() {
   // Use jQuery val() instead of value because it fixes Windows line breaks.
   var rows = $(this.manualOptionsElement).val().match(/^.*$/mg);
   var parent = '';
@@ -691,7 +691,7 @@ Drupal.optionsElement.prototype.optionsFromText = function() {
 /**
  * Utility method to get the next numeric option in a list of options.
  */
-Drupal.optionsElement.prototype.nextNumericKey = function(options) {
+Backdrop.optionsElement.prototype.nextNumericKey = function(options) {
   this.keyType = 'custom';
   options = this.optionsFromText();
   this.keyType = 'numeric';
@@ -711,7 +711,7 @@ Drupal.optionsElement.prototype.nextNumericKey = function(options) {
  * @param optionsElement
  *   An options element object.
  */
-Drupal.theme.prototype.optionsElement = function(optionsElement) {
+Backdrop.theme.prototype.optionsElement = function(optionsElement) {
   var output = '';
   var options = optionsElement.optionsFromText();
   var hasDefault = optionsElement.manualDefaultValueElement;
@@ -724,7 +724,7 @@ Drupal.theme.prototype.optionsElement = function(optionsElement) {
     output += '<tr class="draggable' + (indent > 0 ? ' indented' : '') + '">'
     output += '<td class="' + (hasDefault ? 'option-default-cell' : 'option-order-cell') + '">';
     for (var n = 0; n < indent; n++) {
-      output += Drupal.theme('tableDragIndentation');
+      output += Backdrop.theme('tableDragIndentation');
     }
     output += '<input type="hidden" class="option-parent" value="' + parent.replace(/"/g, '&quot;') + '" />';
     output += '<input type="hidden" class="option-depth" value="' + indent + '" />';
@@ -736,8 +736,8 @@ Drupal.theme.prototype.optionsElement = function(optionsElement) {
     output += keyType == 'textfield' ? '</td><td class="option-value-cell">' : '';
     output += '<input class="form-text option-value" type="text" value="' + value.replace(/"/g, '&quot;') + '" />';
     output += '</td><td class="option-actions-cell">'
-    output += '<a class="add" title="' + Drupal.t('Add new option') + '" href="#"' + (status == 'disabled' ? ' style="display: none"' : '') + '><span class="add">' + Drupal.t('Add') + '</span></a>';
-    output += '<a class="remove" title="' + Drupal.t('Remove option') + '" href="#"' + (status == 'disabled' ? ' style="display: none"' : '') + '><span class="remove">' + Drupal.t('Remove') + '</span></a>';
+    output += '<a class="add" title="' + Backdrop.t('Add new option') + '" href="#"' + (status == 'disabled' ? ' style="display: none"' : '') + '><span class="add">' + Backdrop.t('Add') + '</span></a>';
+    output += '<a class="remove" title="' + Backdrop.t('Remove option') + '" href="#"' + (status == 'disabled' ? ' style="display: none"' : '') + '><span class="remove">' + Backdrop.t('Remove') + '</span></a>';
     output += '</td>';
     output += '</tr>';
     return output;
@@ -747,9 +747,9 @@ Drupal.theme.prototype.optionsElement = function(optionsElement) {
   output += '<table id="' + optionsElement.identifier + '">';
 
   output += '<thead><tr>';
-  output += '<th>' + (hasDefault ? Drupal.t('Default') : '&nbsp;') + '</th>';
-  output += keyType == 'textfield' ? '<th>' + Drupal.t('Key') + '</th>' : '';
-  output += '<th>' + Drupal.t('Value') + '</th>';
+  output += '<th>' + (hasDefault ? Backdrop.t('Default') : '&nbsp;') + '</th>';
+  output += keyType == 'textfield' ? '<th>' + Backdrop.t('Key') + '</th>' : '';
+  output += '<th>' + Backdrop.t('Value') + '</th>';
   output += '<th>&nbsp;</th>';
   output += '</tr></thead>';
 
@@ -780,7 +780,7 @@ Drupal.theme.prototype.optionsElement = function(optionsElement) {
   output += '</table>';
 
   if (optionsElement.defaultValuePattern && optionsElement.manualDefaultValueElement && optionsElement.defaultValuePattern.test(optionsElement.manualDefaultValueElement.value)) {
-    output += Drupal.theme('optionsElementPatternMatch', optionsElement.manualDefaultValueElement.value);
+    output += Backdrop.theme('optionsElementPatternMatch', optionsElement.manualDefaultValueElement.value);
   }
 
   output += '</div>';
@@ -788,41 +788,41 @@ Drupal.theme.prototype.optionsElement = function(optionsElement) {
   return output;
 };
 
-Drupal.theme.prototype.optionsElementPatternMatch = function(matchedValue) {
-  return '<div class="default-value-pattern-match"><span>' + Drupal.t('Manual default value') + '</span>: ' + matchedValue + '</div>';
+Backdrop.theme.prototype.optionsElementPatternMatch = function(matchedValue) {
+  return '<div class="default-value-pattern-match"><span>' + Backdrop.t('Manual default value') + '</span>: ' + matchedValue + '</div>';
 };
 
-Drupal.theme.prototype.optionsElementAdd = function() {
-  return '<div class="form-option-add"><a href="#">' + Drupal.t('Add item') + '</a></div>';
+Backdrop.theme.prototype.optionsElementAdd = function() {
+  return '<div class="form-option-add"><a href="#">' + Backdrop.t('Add item') + '</a></div>';
 };
 
-Drupal.theme.prototype.optionsElementRemoveDefault = function() {
-  return '<div class="remove-default"><a href="#">' + Drupal.t('No default') + '</a></div>';
+Backdrop.theme.prototype.optionsElementRemoveDefault = function() {
+  return '<div class="remove-default"><a href="#">' + Backdrop.t('No default') + '</a></div>';
 };
 
-Drupal.theme.prototype.optionsElementToggle = function() {
-  return '<div class="form-options-manual"><a href="#">' + Drupal.t('Manual entry') + '</a></div>';
+Backdrop.theme.prototype.optionsElementToggle = function() {
+  return '<div class="form-options-manual"><a href="#">' + Backdrop.t('Manual entry') + '</a></div>';
 };
 
-Drupal.theme.tableDragChangedMarker = function () {
+Backdrop.theme.tableDragChangedMarker = function () {
   return ' ';
 };
 
-Drupal.theme.tableDragChangedWarning = function() {
+Backdrop.theme.tableDragChangedWarning = function() {
   return '<span></span>';
 };
 
 /**
  * Field module support for Options widgets.
  */
-Drupal.behaviors.optionsElementFieldUI = {};
-Drupal.behaviors.optionsElementFieldUI.attach = function(context) {
+Backdrop.behaviors.optionsElementFieldUI = {};
+Backdrop.behaviors.optionsElementFieldUI.attach = function(context) {
   var $cardinalityField = $(context).find('#edit-field-cardinality');
   if ($cardinalityField.length) {
     $cardinalityField.change(function() {
       var optionsElementId = $(this).parents('fieldset:first').find('.form-type-options table').attr('id');
-      if (Drupal.optionElements[optionsElementId]) {
-        Drupal.optionElements[optionsElementId].setMultiple(this.value != 1);
+      if (Backdrop.optionElements[optionsElementId]) {
+        Backdrop.optionElements[optionsElementId].setMultiple(this.value != 1);
       }
     }).trigger('change');
   }

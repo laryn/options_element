@@ -290,7 +290,7 @@ function _options_element_add_allowed_values_element(&$form, $element) {
     )
   );
 
-  $element = drupal_array_merge_deep($default_element, $element);
+  $element = backdrop_array_merge_deep($default_element, $element);
   $form['field']['settings']['allowed_values'] = $element;
 
   // Set proper allowed values in $form_state.

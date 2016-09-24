@@ -32,11 +32,11 @@ div.form-option-add a:hover {
 
 div.options-widget a.add,
 div.form-option-add a {
-  background-image: url(add.png);
+  background-image: url('../images/add.png');
 }
 
 div.options-widget a.remove {
-  background-image: url(delete.png);
+  background-image: url('../images/delete.png');
 }
 
 div.default-value-pattern-match {
