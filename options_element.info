@@ -3,3 +3,5 @@ description = A custom form element for entering the options in select lists, ra
 backdrop = 1.x
 type = module
 package = User interface
+
+dependencies[] = system (<1.12)
